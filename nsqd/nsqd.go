@@ -77,6 +77,7 @@ type NSQD struct {
 func New(opts *Options) (*NSQD, error) {
 	var err error
 
+	//add by mf 数据存储的磁盘路径
 	dataPath := opts.DataPath
 	if opts.DataPath == "" {
 		cwd, _ := os.Getwd()
@@ -94,10 +95,15 @@ func New(opts *Options) (*NSQD, error) {
 		optsNotificationChan: make(chan struct{}, 1),
 		dl:                   dirlock.New(dataPath),
 	}
+
+	//add by mf   context的使用
 	n.ctx, n.ctxCancel = context.WithCancel(context.Background())
+
+	//add by mf  http请求对象  nsq 自己实现的
 	httpcli := http_api.NewClient(nil, opts.HTTPClientConnectTimeout, opts.HTTPClientRequestTimeout)
 	n.ci = clusterinfo.New(n.logf, httpcli)
 
+	//add by mf  atomic.Value 的使用 初始化lookupPeers保存的数据类型
 	n.lookupPeers.Store([]*lookupPeer{})
 
 	n.swapOpts(opts)
@@ -138,15 +144,20 @@ func New(opts *Options) (*NSQD, error) {
 	n.logf(LOG_INFO, version.String("nsqd"))
 	n.logf(LOG_INFO, "ID: %d", opts.ID)
 
+	//add by mf  创建TCP监听
 	n.tcpServer = &tcpServer{nsqd: n}
 	n.tcpListener, err = net.Listen("tcp", opts.TCPAddress)
 	if err != nil {
 		return nil, fmt.Errorf("listen (%s) failed - %s", opts.TCPAddress, err)
 	}
+
+	//add by mf  创建HTTP监听
 	n.httpListener, err = net.Listen("tcp", opts.HTTPAddress)
 	if err != nil {
 		return nil, fmt.Errorf("listen (%s) failed - %s", opts.HTTPAddress, err)
 	}
+
+	//add by mf  创建HTTPS监听
 	if n.tlsConfig != nil && opts.HTTPSAddress != "" {
 		n.httpsListener, err = tls.Listen("tcp", opts.HTTPSAddress, n.tlsConfig)
 		if err != nil {

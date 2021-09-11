@@ -328,6 +328,7 @@ func (n *NSQD) LoadMetadata() error {
 		return nil // fresh start
 	}
 
+	//add by mf 读取 Topics配置信息
 	var m meta
 	err = json.Unmarshal(data, &m)
 	if err != nil {
@@ -335,6 +336,7 @@ func (n *NSQD) LoadMetadata() error {
 	}
 
 	for _, t := range m.Topics {
+		//判断Topic 名称是否为有效名
 		if !protocol.IsValidTopicName(t.Name) {
 			n.logf(LOG_WARN, "skipping creation of invalid topic %s", t.Name)
 			continue

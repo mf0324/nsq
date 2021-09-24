@@ -251,16 +251,19 @@ func (n *NSQD) Main() error {
 	}
 
 	n.waitGroup.Wrap(func() {
+		//add by mf 启动tcp监听服务
 		exitFunc(protocol.TCPServer(n.tcpListener, n.tcpServer, n.logf))
 	})
 
 	httpServer := newHTTPServer(n, false, n.getOpts().TLSRequired == TLSRequired)
 	n.waitGroup.Wrap(func() {
+		//add by mf 启动http服务
 		exitFunc(http_api.Serve(n.httpListener, httpServer, "HTTP", n.logf))
 	})
 	if n.tlsConfig != nil && n.getOpts().HTTPSAddress != "" {
 		httpsServer := newHTTPServer(n, true, true)
 		n.waitGroup.Wrap(func() {
+			//add by mf 启动https服务
 			exitFunc(http_api.Serve(n.httpsListener, httpsServer, "HTTPS", n.logf))
 		})
 	}
@@ -420,6 +423,8 @@ func (n *NSQD) Exit() {
 		// avoid double call
 		return
 	}
+
+	//add by mf tcp连接监听关闭
 	if n.tcpListener != nil {
 		n.tcpListener.Close()
 	}

@@ -34,6 +34,7 @@ type protocolV2 struct {
 }
 
 func (p *protocolV2) NewClient(conn net.Conn) protocol.Client {
+	//add by mf 生成客户端ID
 	clientID := atomic.AddInt64(&p.nsqd.clientIDSequence, 1)
 	return newClientV2(clientID, conn, p.nsqd)
 }
